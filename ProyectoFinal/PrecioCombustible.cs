@@ -24,14 +24,24 @@ namespace ProyectoFinal
         {
             get { return fechaActual; }
         }
+
         //Constructor Con precio inicial
         public PrecioCombustible(decimal precioInicial)
         {
             PrecioPorLitro = precioInicial;
             fechaActual = DateTime.Now;
         }
+
         public PrecioCombustible() { }
-        public decimal CalcularLitros()
+
+        public decimal CalcularLitros(decimal cantidadIngresada)
+        {
+            if (cantidadIngresada < 0)
+            {
+                throw new ArgumentException("La cantidad ingresada no puede ser negativa.");
+            }
+            return cantidadIngresada / PrecioPorLitro;
+        }
         public decimal CalcularCosto(decimal litros)
         {
             if (litros < 0)
