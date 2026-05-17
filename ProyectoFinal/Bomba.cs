@@ -6,13 +6,13 @@ namespace ProyectoFinal
 {
     internal class Bomba
     {
-        // Atributos de la bomba
+        // ----Atributos de la bomba----
         private int id;
         private string nombre;
-        private bool estaDisponible;
-        private decimal litrosSurtidos;
+        private bool estaActivo;
+        private decimal litrosDespachados;
 
-        //propiedades
+        // ----Propiedades de la bomba----
         public int Id { get { return id; } }
 
         public string Nombre { get {  return nombre; } set
@@ -25,53 +25,64 @@ namespace ProyectoFinal
             }
         }
 
-        public bool EstaDisponible { get { return estaDisponible; } }
+        public bool EstaActivo { get { return estaActivo; } }
 
-        public decimal LitrosSurtidos { get { return litrosSurtidos; } }
+        public decimal LitrosDespachados { get { return litrosDespachados; } }
 
         public Bomba (int id, string nombre)
         {
             this.id = id;
             Nombre = nombre;
-            estaDisponible = false;
-            litrosSurtidos = 0;
+            estaActivo = false;
+            litrosDespachados = 0;
         }
 
         public Bomba() { }
 
-        public void IniciarSurtido()
+        //----Metodos publicos de la bomba----
+        public async Task IniciarDespachoAsync()
         {
-            if (estaDisponible)
+            if (estaActivo)
             {
-                throw new InvalidOperationException("La bomba ya está en uso.");
+                throw new InvalidOperationException($"La bomba {nombre} ya está en uso.");
             }
-            estaDisponible = true;
-            litrosSurtidos = 0;
+            estaActivo = true;
+            ResetearLitros();
+            await Task.Delay(100); //Pequeña pausa para no bloquear la interfaz
         }
 
-        public void DetenerSurtido()
+        public async Task DetenerDespachoAsync()
         {
-            if (!estaDisponible)
+            if (!estaActivo)
             {
-                throw new InvalidOperationException("La bomba no está en uso.");
+                throw new InvalidOperationException($"La bomba {nombre} no está en uso.");
             }
-            estaDisponible = false;
+            estaActivo = false;
+            await Task.Delay(100); 
         }
 
         public void RegistrarLitros(decimal litros)
         {
             if (litros < 0 ) 
                 throw new ArgumentException("La cantidad de litros no puede ser negativa.");
-            litrosSurtidos += litros;
+            litrosDespachados += litros;
         }
-        private void ResetearLitros()
+        public async Task FinalizarSesionAsync()
         {
-            litrosSurtidos = 0;
-        }
-        public void ReiniciarBomba()
-        {
-            DetenerSurtido();
+            await DetenerDespachoAsync();
             ResetearLitros();
         }
+        public async Task ReiniciarBombaAsync()
+        {
+            estaActivo = false; // sin validación intencional
+            ResetearLitros();
+            await Task.Delay(100);
+        }
+        //----Metodos privados de la bomba----
+        private void ResetearLitros()
+        {
+            litrosDespachados = 0;
+        }
+
     }
 }
