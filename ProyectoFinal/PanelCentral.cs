@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ProyectoFinal.Abastecimientos;
 
 namespace ProyectoFinal
 {
@@ -10,7 +11,7 @@ namespace ProyectoFinal
     {
         // ----Atributos privados----
         private List<Bomba> bombas;
-        private List<Abastecimiento> abastecimientos;
+        private List<Abastecimiento> abastecimientos; 
         private PrecioCombustible precio;
         private Estadisticas estadisticas;
         private const string rutaArchivo = "abastecimientos.json";
@@ -51,7 +52,7 @@ namespace ProyectoFinal
 
             await bomba.IniciarDespachoAsync();
 
-            Abastecimiento nuevo = new Abastecimiento(contadorId++, nombreCliente, bombaId, monto, precio);
+            Abastecimiento nuevo = new AbastecimientoPrepago(contadorId++, nombreCliente, bombaId, monto, precio);
             abastecimientos.Add(nuevo);
             GuardarAbastecimientos();
         }
@@ -66,7 +67,7 @@ namespace ProyectoFinal
 
             await bomba.IniciarDespachoAsync();
 
-            Abastecimiento nuevo = new Abastecimiento(contadorId++, nombreCliente, bombaId);
+            Abastecimiento nuevo = new AbastecimientoTanqueLleno(contadorId++, nombreCliente, bombaId);
             abastecimientos.Add(nuevo);
             GuardarAbastecimientos();
         }
@@ -86,8 +87,10 @@ namespace ProyectoFinal
                 {
                     actual.RegistrarDespacho(respuesta.LitrosDespachados);
 
-                    if (actual.Tipo == "Tanque Lleno")
+                    if (actual is AbastecimientoTanqueLleno)
+                    {
                         actual.CantidadPagada = precio.CalcularCosto(respuesta.LitrosDespachados);
+                    }
 
                     GuardarAbastecimientos();
                 }

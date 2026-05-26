@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ProyectoFinal.Abastecimientos;
 
 namespace ProyectoFinal
 {
@@ -28,11 +29,27 @@ namespace ProyectoFinal
         }
         public List<Abastecimiento> InformePrepagos()
         {
-            return FiltrarPorTipo("Prepago");
+            List<Abastecimiento> resultado = new List<Abastecimiento>();
+            foreach (var a in abastecimientos)
+            {
+                if (a is AbastecimientoPrepago)
+                {
+                    resultado.Add(a);
+                }
+            }
+            return resultado;
         }
         public List<Abastecimiento> InformeTanqueLleno()
         {
-            return FiltrarPorTipo("Tanque Lleno");
+            List<Abastecimiento> resultado = new List<Abastecimiento>();
+            foreach (var a in abastecimientos)
+            {
+                if (a is AbastecimientoTanqueLleno)
+                {
+                    resultado.Add(a);
+                }
+            }
+            return resultado;
         }
         public int BombaMasUtilizada()
         {
@@ -51,17 +68,6 @@ namespace ProyectoFinal
             foreach (var a in abastecimientos)
             {
                 if (a.Fecha.Date == fecha.Date)
-                    resultado.Add(a);
-            }
-            return resultado;
-        }
-        //Filtrar por tipo
-        private List<Abastecimiento> FiltrarPorTipo(string tipo)
-        {
-            List<Abastecimiento> resultado = new List<Abastecimiento>();
-            foreach (var a in abastecimientos)
-            {
-                if (a.Tipo == tipo)
                     resultado.Add(a);
             }
             return resultado;

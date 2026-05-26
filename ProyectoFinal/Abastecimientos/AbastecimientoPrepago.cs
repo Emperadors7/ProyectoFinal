@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProyectoFinal.Abastecimiento
+namespace ProyectoFinal.Abastecimientos
 {
     internal class AbastecimientoPrepago : Abastecimiento
     {

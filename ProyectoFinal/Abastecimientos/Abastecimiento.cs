@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
-namespace ProyectoFinal.Abastecimiento
+
+namespace ProyectoFinal.Abastecimientos
 {
+    [JsonDerivedType(typeof(AbastecimientoPrepago), typeDiscriminator: "prepago")]
+    [JsonDerivedType(typeof(AbastecimientoTanqueLleno), typeDiscriminator: "tanqueLleno")]
     internal abstract class Abastecimiento
+
     {
         private int id;
         private string nombreCliente;
