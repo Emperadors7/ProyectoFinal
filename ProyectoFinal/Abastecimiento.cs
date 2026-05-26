@@ -16,7 +16,12 @@ namespace ProyectoFinal
         private DateTime fecha;
         private string estado;
 
-        public int Id { get { return id; } }
+        //----Propiedades Publicas----
+        public int Id 
+        { 
+            get { return id; }
+            set { id = value; }
+        }
 
         public string NombreCliente
         {
@@ -41,10 +46,9 @@ namespace ProyectoFinal
             get { return tipo; }
             set
             {
-                if (value != "prepago" && value != "tanque lleno")
-                {
+                if (value != "prepago" && value != "tanque lleno")   
                     throw new ArgumentException("El tipo debe ser 'prepago' o 'tanque lleno'.");
-                }
+                tipo = value;
             }
         }
         public decimal CantidadPagada
@@ -70,12 +74,20 @@ namespace ProyectoFinal
             set { litrosDespachados = value; }
         }
 
-        public DateTime Fecha { get { return fecha; } }
+        public DateTime Fecha 
+        { 
+            get { return fecha; }
+            set { fecha = value; }
+        }
 
-        public string Estado { get { return estado; } }
+        public string Estado 
+        { 
+            get { return estado; }
+            set { estado = value; }
+        }
 
         //Contructror para prepago
-        public Abastecimiento(int id, string nombreCliente, int bombaId, string tipo, decimal cantidadPagada, PrecioCombustible precio)
+        public Abastecimiento(int id, string nombreCliente, int bombaId, decimal cantidadPagada, PrecioCombustible precio)
         {
             this.id = id;
             NombreCliente = nombreCliente;
@@ -88,7 +100,7 @@ namespace ProyectoFinal
             estado = "pendiente";
         }
         //Constructor para tanque lleno
-        public Abastecimiento(int id, string nombreCliente, int bombaId, string tipo)
+        public Abastecimiento(int id, string nombreCliente, int bombaId )
         {
             this.id = id;
             NombreCliente = nombreCliente;
@@ -100,6 +112,8 @@ namespace ProyectoFinal
             fecha = DateTime.Now;
             estado = "pendiente";
         }
+        public Abastecimiento() { }
+
         public void RegistrarDespacho(decimal litrosRecibidos)
         {
             litrosDespachados = litrosRecibidos;
