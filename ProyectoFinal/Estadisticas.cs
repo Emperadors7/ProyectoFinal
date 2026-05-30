@@ -9,10 +9,12 @@ namespace ProyectoFinal
     {
         //---Atributos Privados---
         private List<Abastecimiento> abastecimientos;
+        private List<Clientes> clientes;
         //---Constructor---
-        public Estadisticas(List<Abastecimiento> abastecimientos)
+        public Estadisticas(List<Abastecimiento> abastecimientos, List<Clientes> clientes)
         {
             this.abastecimientos = abastecimientos;
+            this.clientes = clientes;
         }
         //---Metodos Publicos---
         public List<Abastecimiento> CierreCajaDiario(DateTime fecha)
@@ -58,6 +60,15 @@ namespace ProyectoFinal
         public int BombaMenosUtilizada()
         {
             return ObtenerBombaExtremo(false);
+        }
+        public List<Abastecimiento> HistorialPorCliente(string nit)
+        {
+            foreach (var c in clientes)
+            {
+                if (c.NIT == nit)
+                    return c.ObtenerHistorial();
+            }
+            return new List<Abastecimiento>();
         }
 
         //---Metodos Privados---

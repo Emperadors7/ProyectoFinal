@@ -9,10 +9,10 @@ namespace ProyectoFinal.Abastecimientos
     [JsonDerivedType(typeof(AbastecimientoPrepago), typeDiscriminator: "prepago")]
     [JsonDerivedType(typeof(AbastecimientoTanqueLleno), typeDiscriminator: "tanqueLleno")]
     internal abstract class Abastecimiento
-
     {
+        //----Atributos Privados----
         private int id;
-        private string nombreCliente;
+        private int clienteId;
         private int bombaId;
         private decimal cantidadPagada;
         private decimal litrosDespachados;
@@ -26,16 +26,14 @@ namespace ProyectoFinal.Abastecimientos
             set { id = value; }
         }
 
-        public string NombreCliente
+        public int ClienteId
         {
-            get { return nombreCliente; }
+            get { return clienteId; }
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
-                {
-                    throw new ArgumentException("El nombre del cliente no puede estar vacío.");
-                }
-                nombreCliente = value;
+                if (value <= 0)
+                    throw new ArgumentException("El ID del cliente no es válido.");
+                clienteId = value;
             }
         }
         public int BombaId
@@ -80,7 +78,6 @@ namespace ProyectoFinal.Abastecimientos
             LitrosDespachados = litrosRecibidos;
             ActualizarEstado();
         }
-
         public abstract void ActualizarEstado();
     }
 }

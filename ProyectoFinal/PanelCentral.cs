@@ -14,9 +14,14 @@ namespace ProyectoFinal
         private List<Abastecimiento> abastecimientos; 
         private PrecioCombustible precio;
         private Estadisticas estadisticas;
+        private List<Clientes> clientes;
+
         private const string rutaArchivo = "abastecimientos.json";
         private const string rutaPrecio = "precio_dia.json";
+        private const string rutaClientes = "clientes.json";
+
         private int contadorId;
+        private int contadorClienteId;
 
         // ----Propiedades públicas----
         public List<Bomba> Bombas { get { return bombas; } }
@@ -28,48 +33,59 @@ namespace ProyectoFinal
         {
             abastecimientos = new List<Abastecimiento>();
             bombas = new List<Bomba>();
+            clientes = new List<Clientes>();
             contadorId = 1;
+            contadorClienteId = 1;
 
             for (int i = 1; i <= 4; i++)
                 bombas.Add(new Bomba(i, $"Bomba {i}"));
 
             CargarPrecio();
-
             CargarAbastecimientos();
+            CargarClientes();
 
-            estadisticas = new Estadisticas(abastecimientos);
+            VincularHistorialClientes();
+            estadisticas = new Estadisticas(abastecimientos, clientes);
         }
 
         // ----Métodos públicos----
 
         // Iniciar abastecimiento prepago
-        public async Task IniciarPrepago(string nombreCliente, int bombaId, decimal monto)
+        public async Task IniciarPrepago(string nombreCliente, string nit, string telefono, int bombaId, decimal monto)
         {
             Bomba bomba = BuscarBomba(bombaId);
-
             if (bomba == null)
                 throw new Exception($"No existe la bomba {bombaId}.");
 
             await bomba.IniciarDespachoAsync();
 
-            Abastecimiento nuevo = new AbastecimientoPrepago(contadorId++, nombreCliente, bombaId, monto, precio);
+            Clientes cliente = BuscarOCrearCliente(nombreCliente, nit, telefono);
+
+            AbastecimientoPrepago nuevo = new AbastecimientoPrepago(contadorId++, cliente.Id, bombaId, monto, precio);
+
+            cliente.AgregarAbastecimientos(nuevo);
             abastecimientos.Add(nuevo);
             GuardarAbastecimientos();
+            GuardarClientes(); 
         }
 
         // Iniciar abastecimiento tanque lleno
-        public async Task IniciarTanqueLleno(string nombreCliente, int bombaId)
+        public async Task IniciarTanqueLleno(string nombreCliente, string nit, string telefono, int bombaId)
         {
             Bomba bomba = BuscarBomba(bombaId);
-
             if (bomba == null)
                 throw new Exception($"No existe la bomba {bombaId}.");
 
             await bomba.IniciarDespachoAsync();
 
-            Abastecimiento nuevo = new AbastecimientoTanqueLleno(contadorId++, nombreCliente, bombaId);
+            Clientes cliente = BuscarOCrearCliente(nombreCliente, nit, telefono);
+
+            AbastecimientoTanqueLleno nuevo = new AbastecimientoTanqueLleno(contadorId++, cliente.Id, bombaId, precio); 
+
+            cliente.AgregarAbastecimientos(nuevo); 
             abastecimientos.Add(nuevo);
             GuardarAbastecimientos();
+            GuardarClientes(); 
         }
         public async Task RecibirRespuestaArduino(string jsonRecibido)
         {
@@ -86,16 +102,12 @@ namespace ProyectoFinal
                 if (actual != null)
                 {
                     actual.RegistrarDespacho(respuesta.LitrosDespachados);
-
-                    if (actual is AbastecimientoTanqueLleno)
-                    {
-                        actual.CantidadPagada = precio.CalcularCosto(respuesta.LitrosDespachados);
-                    }
-
                     GuardarAbastecimientos();
                 }
-
-                await bomba.FinalizarSesionAsync();
+                if (respuesta.Estado == "finalizado" || respuesta.Estado == "detenido")
+                {
+                    await bomba.FinalizarSesionAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -142,7 +154,72 @@ namespace ProyectoFinal
         }
 
         // ----Métodos privados----
-
+        private Clientes BuscarOCrearCliente(string nombre, string nit, string telefono)
+        {
+            foreach (var c in clientes)
+            {
+                if (c.NIT == nit)
+                    return c;
+            }
+            Clientes nuevo = new Clientes(contadorClienteId++, nombre, nit, telefono);
+            clientes.Add(nuevo);
+            return nuevo;
+        }
+        private Clientes BuscarClientePorId(int id)
+        {
+            foreach (var c in clientes)
+            {
+                if (c.Id == id) return c;
+            }
+            return null;
+        }
+        private void VincularHistorialClientes()
+        {
+            foreach (var a in abastecimientos)
+            {
+                Clientes cliente = BuscarClientePorId(a.ClienteId);
+                if (cliente != null)
+                {
+                    cliente.AgregarAbastecimientos(a);
+                }
+            }
+        }
+        private void GuardarClientes()
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(clientes);
+                File.WriteAllText(rutaClientes, json);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al guardar clientes: {ex.Message}");
+            }
+        }
+        private void CargarClientes()
+        {
+            try
+            {
+                if (File.Exists(rutaClientes))
+                {
+                    string json = File.ReadAllText(rutaClientes);
+                    List<Clientes> cargados = JsonSerializer.Deserialize<List<Clientes>>(json);
+                    if (cargados != null)
+                    {
+                        clientes = cargados;
+                        foreach (var c in clientes)
+                        {
+                            if (c.Id >= contadorClienteId)
+                                contadorClienteId = c.Id + 1;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error al cargar clientes: {ex.Message}");
+            }
+        }
         // Busca una bomba por ID
         private Bomba BuscarBomba(int id)
         {
@@ -189,11 +266,15 @@ namespace ProyectoFinal
                     if (cargados != null)
                     {
                         abastecimientos = cargados;
-                        contadorId = abastecimientos.Count + 1;
+                        foreach (var a in abastecimientos)
+                        {
+                            if (a.Id >= contadorId)
+                                contadorId = a.Id + 1;
+                        }
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex)x
             {
                 throw new Exception($"Error al cargar abastecimientos: {ex.Message}");
             }
