@@ -274,7 +274,7 @@ namespace ProyectoFinal
                     }
                 }
             }
-            catch (Exception ex)x
+            catch (Exception ex)
             {
                 throw new Exception($"Error al cargar abastecimientos: {ex.Message}");
             }
