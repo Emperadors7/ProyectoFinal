@@ -152,6 +152,10 @@ namespace ProyectoFinal
         {
             return estadisticas.BombaMenosUtilizada();
         }
+        public int ObtenerUsosDeBomba(int bombaId)
+        {
+            return estadisticas.UsosDeBomba(bombaId);
+        }
 
         // ----Métodos privados----
         private Clientes BuscarOCrearCliente(string nombre, string nit, string telefono)

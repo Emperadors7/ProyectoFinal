@@ -70,6 +70,18 @@ namespace ProyectoFinal
             }
             return new List<Abastecimiento>();
         }
+        public int UsosDeBomba(int bombaId)
+        {
+            int contador = 0;
+            foreach (var a in abastecimientos)
+            {
+                if (a.BombaId == bombaId)
+                {
+                    contador++;
+                }
+            }
+            return contador;
+        }
 
         //---Metodos Privados---
         //Filtrar por fecha
